@@ -13,7 +13,8 @@ export default function Navbar({setUser})
         if (error) {
             console.error('Error signing out:', error.message);
         } else {
-            setUser(""); // Reset user state to empty string or initial state value
+            localStorage.removeItem('user');
+            setUser(null);
             navigate("/"); // Redirect to the home page or login page
         }
     }

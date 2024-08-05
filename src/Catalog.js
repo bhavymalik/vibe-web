@@ -7,6 +7,7 @@ import supabase from './supabaseClient';
 export default function Catalog({ user, setUser }) {
     const [cards, setCards] = useState([]);
     const [product, setProduct] = useState({
+        id: null, // Reset id
         product_url: "",
         product_title: "",
         price_available: "",	
@@ -19,7 +20,7 @@ export default function Catalog({ user, setUser }) {
         users: "",	
         additional_description: "",	
         additional_images: "",
-        email: user,
+        email: `${user}`,
     });
     const [showsetcatalog, setshowsetcatalog] = useState(false);
     const [dragging, setDragging] = useState(false);
@@ -30,6 +31,7 @@ export default function Catalog({ user, setUser }) {
     const pagebtnRef = useRef(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [cardsPerPage] = useState(40);
+    const [isEditing, setIsEditing] = useState(false);
 
 
     function handleChange(event) {
@@ -41,25 +43,69 @@ export default function Catalog({ user, setUser }) {
     }
 
     async function addproduct() {
-        const { data, error } = await supabase
-            .from('user_data')
-            .insert(product)
-            .select();
-
-        if (error) {
-            console.error('Error inserting data:', error);
-        } else {
-            console.log("New product added successfully:", data[0]);
-            setCards(prevCards => [
-                ...prevCards,
-                <Card key={data[0].id} obj={data[0]} setCards={setCards}/>
-            ]);
-            crossproduct();
+        const { id, ...updateData } = product;
+    
+        try {
+            if (isEditing && id) {
+                // Update existing product
+                console.log("Updating product with ID:", id);
+                console.log("Update data:", updateData);
+    
+                const { data, error } = await supabase
+                    .from('user_data')
+                    .update(updateData)
+                    .eq('id', id)
+                    .select(); // Request data back
+    
+                if (error) {
+                    console.error('Error updating data:', error);
+                } else {
+                    if (data && data.length > 0) {
+                        console.log("Product updated successfully:", data[0]);
+                        setCards(prevCards => prevCards.map(card => 
+                            card.props.obj.id === id 
+                            ? <Card key={data[0].id} obj={data[0]} setCards={setCards} editCard={editCard}/>
+                            : card
+                        ));
+                    } else {
+                        console.error('No data returned after update.');
+                    }
+                }
+            } else {
+                // Insert new product
+                console.log("Inserting new product:", product);
+    
+                const { data, error } = await supabase
+                    .from('user_data')
+                    .insert(product)
+                    .select();
+    
+                if (error) {
+                    console.error('Error inserting data:', error);
+                } else {
+                    if (data && data.length > 0) {
+                        console.log("New product added successfully:", data[0]);
+                        setCards(prevCards => [
+                            ...prevCards,
+                            <Card key={data[0].id} obj={data[0]} setCards={setCards} editCard={editCard}/>
+                        ]);
+                    } else {
+                        console.error('No data returned after insert.');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Unexpected error:', error);
         }
+        crossproduct();
     }
+    
+    
+    
 
     function crossproduct(){
         setProduct({
+            id: null, // Reset id
             product_url: "",
             product_title: "",
             price_available: "",	
@@ -72,10 +118,18 @@ export default function Catalog({ user, setUser }) {
             users: "",	
             additional_description: "",	
             additional_images: "",
-            email: user,
+            email: `${user}`,
         });
         setshowsetcatalog(!showsetcatalog);
         setImagePreview(null);  // Clear the image preview
+        setIsEditing(false);
+    }
+
+    function editCard(cardData) {
+        setProduct(cardData);
+        setshowsetcatalog(true);
+        setImagePreview(cardData.image);
+        setIsEditing(true);
     }
 
     useEffect(() => {
@@ -88,7 +142,11 @@ export default function Catalog({ user, setUser }) {
             if (error) {
                 console.error('Error fetching data:', error);
             } else {
-                setCards(data.map(obj => <Card key={obj.id} obj={obj} setCards={setCards} />));
+                console.log(data)
+                console.log(user)
+                setCards(data.map(obj => <Card key={obj.id} obj={obj} setCards={setCards} editCard={editCard}/>));
+                console.log("data fetched")
+                console.log(cards)
             }
         }
         if (user) {
@@ -96,18 +154,18 @@ export default function Catalog({ user, setUser }) {
         }
     }, [user]);
 
-    const handleFileParsed = async (data) => {
-        const userData = data.map(item => ({ ...item, email: user }));
-        const { error } = await supabase
-            .from('user_data')
-            .insert(userData);
+    // const handleFileParsed = async (data) => {
+    //     const userData = data.map(item => ({ ...item, email: user }));
+    //     const { error } = await supabase
+    //         .from('user_data')
+    //         .insert(userData);
 
-        if (error) {
-            console.error('Error inserting data:', error);
-        } else {
-            setCards(userData.map(obj => <Card key={obj.id} obj={obj} setCards={setCards}/>));
-        }
-    };
+    //     if (error) {
+    //         console.error('Error inserting data:', error);
+    //     } else {
+    //         setCards(userData.map(obj => <Card key={obj.id} obj={obj} setCards={setCards}/>));
+    //     }
+    // };
 
     useEffect(() => {
         if (showsetcatalog) {
@@ -125,7 +183,11 @@ export default function Catalog({ user, setUser }) {
                 pagebtnRef.current.style.top = `${300 + rowHeight}px`;
             }
         }
-    }, [cards]);
+    }, [cards, currentPage]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage]);
 
     const handleDragOver = (e) => {
         e.preventDefault();

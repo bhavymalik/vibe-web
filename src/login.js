@@ -71,7 +71,8 @@ function Login({user, setUser }) {
                 }
 
                 setUser(email);
-                localStorage.setItem('user', JSON.stringify(email)); // Store user in local storage
+                localStorage.setItem('user', email);
+
                 console.log(email);
                 console.log(userProfile); // Log the user profile instead of `user`
                 navigate('/app'); // Navigate to /app upon successful login

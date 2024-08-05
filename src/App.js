@@ -6,32 +6,32 @@ import { useNavigate } from 'react-router-dom';
 import supabase from './supabaseClient';
 import './App.css'
 
-export default function App({ user,setUser, csvData, setCsvData }) {
+export default function App({ user,setUser }) {
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                setUser(session.user.email);
-            } else {
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
-                }
-            }
-        };
+    // useEffect(() => {
+    //     const checkUser = async () => {
+    //         const { data: { session } } = await supabase.auth.getSession();
+    //         if (session) {
+    //             setUser(session.user.email);
+    //         } else {
+    //             const storedUser = localStorage.getItem('user');
+    //             if (storedUser) {
+    //                 setUser(JSON.parse(storedUser));
+    //             }
+    //         }
+    //     };
 
-        checkUser();
-    }, [setUser]);
+    //     checkUser();
+    // }, [setUser]);
 
-    useEffect(() => {
-        if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
-        } else {
-            localStorage.removeItem('user');
-        }
-    }, [user]);
+    // useEffect(() => {
+    //     if (user) {
+    //         localStorage.setItem('user', JSON.stringify(user));
+    //     } else {
+    //         localStorage.removeItem('user');
+    //     }
+    // }, [user]);
 
     return (
         <div className="App">
@@ -39,7 +39,7 @@ export default function App({ user,setUser, csvData, setCsvData }) {
                 user ?
                     <>
                         <Navbar setUser={setUser}/>
-                        <Catalog user={user} setUser={setUser} csvData={csvData} setCsvData={setCsvData} />
+                        <Catalog user={user} setUser={setUser} />
                     </>
                     :
                     <>

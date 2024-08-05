@@ -17,9 +17,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function MyProject(){
 
-  const [user, setUser] = React.useState(null);
+const [user, setUser] = React.useState(null);
 const clientid= "477035451594-v4atd2luf5hn7tcbdqbs19ro0vupfegb.apps.googleusercontent.com"
-const [csvData, setCsvData] = React.useState([]);
 
 
 React.useEffect(() => {
@@ -36,15 +35,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/app",
-    element: <App user={user}  setUser={setUser} csvData={csvData} setCsvData={setCsvData}/>,
+    element: <App user={user}  setUser={setUser} />,
   },
   {
     path: "/app1",
-    element: <App user={user} setUser={setUser} csvData={csvData} setCsvData={setCsvData} />,
+    element: <App user={user} setUser={setUser}  />,
   },
   {
     path: "/catalog",
-    element: <Catalog user={user} setUser={setUser} csvData={csvData} setCsvData={setCsvData} />,
+    element: <Catalog user={user} setUser={setUser} />,
   },
   {
     path: "/analytics",

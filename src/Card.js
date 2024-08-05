@@ -58,7 +58,7 @@ export default function Card(props) {
             { /*badgeText && <button className="btn">{badgeText}</button> */}
             {props.obj.price_available && <p className='card-price'><b>From {props.obj.currency} {props.obj.price}</b></p>}
             <div className="icon-container">
-            <i className="fa fa-edit"></i>
+            <i className="fa fa-edit" onClick={() => props.editCard(props.obj)}></i>
             <i className="fa fa-trash" onClick={dltitem}></i>
             </div>
             <p className='card-title'>{props.obj.product_title}</p>
