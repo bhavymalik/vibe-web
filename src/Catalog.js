@@ -154,7 +154,7 @@ export default function Catalog({ user, setUser }) {
         if (user) {
             fetchUserData();
         }
-    }, [user]);
+    }, [user,cards]);
 
     // const handleFileParsed = async (data) => {
     //     const userData = data.map(item => ({ ...item, email: user }));
