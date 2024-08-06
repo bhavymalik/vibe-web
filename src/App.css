@@ -241,14 +241,14 @@ hr{
 
 .icon-container {
   position: relative;
-  margin-left: 80%;
+  margin-left: 70%;
   display: flex;
   justify-content: space-between;
   width: 50px; /* Adjust the width as needed */
 }
 
 .fa-trash,
-.fa-edit {
+.fa-edit,.fa-eye, .fa-eye-slash {
   font-size: 24px;
   color: #878787;
   cursor: pointer;

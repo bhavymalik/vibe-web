@@ -7,7 +7,8 @@ import supabase from './supabaseClient';
 export default function Catalog({ user, setUser }) {
     const [cards, setCards] = useState([]);
     const [product, setProduct] = useState({
-        id: null, // Reset id
+        id: null,
+        visibility: true,
         product_url: "",
         product_title: "",
         price_available: "",	
@@ -77,7 +78,7 @@ export default function Catalog({ user, setUser }) {
     
                 const { data, error } = await supabase
                     .from('user_data')
-                    .insert(product)
+                    .insert(updateData)
                     .select();
     
                 if (error) {
@@ -105,7 +106,8 @@ export default function Catalog({ user, setUser }) {
 
     function crossproduct(){
         setProduct({
-            id: null, // Reset id
+            id: null,
+            visibility: true,
             product_url: "",
             product_title: "",
             price_available: "",	

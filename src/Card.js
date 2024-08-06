@@ -5,36 +5,50 @@ export default function Card(props) {
     const [imageIndex, setImageIndex] = useState(0);
     const [hovered, setHovered] = useState(false);
 
-    // let badgeText;
-    // if (props.obj.quantity === 0) {
-    //     badgeText = "SOLD OUT";
-    // } else if (props.obj.quantity > 0) {
-    //     badgeText = `AVAILABLE ${props.obj.quantity}`;
-    // }
-
     const additionalImages = props.obj.additional_images
-    .replace(/^\[|\]$/g, '') // Remove the square brackets at the start and end
-    .split(',')
-    .map(url => url.trim().replace(/^"|"$/g, '')); // Remove any extra spaces and quotes
+        .replace(/^\[|\]$/g, '') // Remove the square brackets at the start and end
+        .split(',')
+        .map(url => url.trim().replace(/^"|"$/g, '')); // Remove any extra spaces and quotes
 
     const images = [props.obj.image, ...additionalImages];
     const imageUrl = images[imageIndex].replace(/"/g, '');
-    //console.log('Cover Image URL:', imageUrl);
 
     const handleClick = () => {
         window.open(props.obj.product_url, '_blank');
     };
 
-    async function dltitem(){
-        const {error} = await supabase
-        .from('user_data')
-        .delete()
-        .eq('product_title',props.obj.product_title)
+    async function changeVisibility() {
+        const newVisibility = !props.obj.visibility;
+
+        const { data, error } = await supabase
+            .from('user_data')
+            .update({ visibility: newVisibility })
+            .eq('id', props.obj.id);
+
+        if (error) {
+            console.error('Error updating visibility:', error);
+        } else {
+            console.log("Visibility updated successfully:", props.obj.visibility);
+            props.setCards(prevCards => 
+                prevCards.map(card => 
+                    card.props.obj.id === props.obj.id 
+                    ? { ...card, props: { ...card.props, obj: { ...card.props.obj, visibility: newVisibility } } }
+                    : card
+                )
+            );
+        }
+    }
+
+    async function dltitem() {
+        const { error } = await supabase
+            .from('user_data')
+            .delete()
+            .eq('id', props.obj.id);
 
         if (error) {
             console.error('Error deleting data:', error);
         } else {
-            props.setCards(prevCards => prevCards.filter(card => card.props.obj.product_title !== props.obj.product_title));
+            props.setCards(prevCards => prevCards.filter(card => card.props.obj.id !== props.obj.id));
         }
     }
 
@@ -55,11 +69,14 @@ export default function Card(props) {
             onMouseLeave={() => setHovered(false)}
         >
             <img src={imageUrl} alt="" className="card-photo" onClick={handleClick} />
-            { /*badgeText && <button className="btn">{badgeText}</button> */}
             {props.obj.price_available && <p className='card-price'><b>From {props.obj.currency} {props.obj.price}</b></p>}
             <div className="icon-container">
-            <i className="fa fa-edit" onClick={() => props.editCard(props.obj)}></i>
-            <i className="fa fa-trash" onClick={dltitem}></i>
+                <i 
+                    className={props.obj.visibility ? "fa fa-eye" : "fa fa-eye-slash"}
+                    onClick={changeVisibility}
+                ></i>
+                <i className="fa fa-edit" onClick={() => props.editCard(props.obj)}></i>
+                <i className="fa fa-trash" onClick={dltitem}></i>
             </div>
             <p className='card-title'>{props.obj.product_title}</p>
             <p className='card-description'>{props.obj.description}</p>
